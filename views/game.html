@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Stylesheet -->
+    <link href="/static/styles/game.css" rel="stylesheet">
+    <!-- Quintus lib -->
+    <script src="/node_modules/Quintus/lib/quintus.js"></script>
+    <script src="/node_modules/Quintus/lib/quintus_sprites.js"></script>
+    <script src="/node_modules/Quintus/lib/quintus_scenes.js"></script>
+    <script src="/node_modules/Quintus/lib/quintus_input.js"></script>
+    <script src="/node_modules/Quintus/lib/quintus_2d.js"></script>
+    <script src="/node_modules/Quintus/lib/quintus_touch.js"></script>
+    <script src="/node_modules/Quintus/lib/quintus_ui.js"></script>
+    <!-- Socket.io -->
+    <script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
+    <!-- Game -->
+    <script src="/static/js/game.js"></script>
+    <style>
+    
+      #chat
+      {
+            
+            height:560px;
+      }
+
+      #contentWrap
+      {
+        display: none;
+      }
+
+      #chatWrap
+      {
+        
+        border: 5px #008000 inset;
+      }
+        
+      #mazeGame {
+
+        background-color: black;
+      }
+      
+      
+      #mazeGame {
+        background-color: black;
+      }
+      .players {
+        z-index: 5;
+        position: absolute;
+        right: 0;
+        text-align: right;
+        font-size: 1.5em;
+        margin: 30px;
+        background-color: #FFFFFF;
+        border: 1px solid black;
+        opacity: 0.6;
+      }
+      .runtime {
+        z-index: 5;
+        position: absolute;
+        right: 0px;
+        text-align: left;
+        top:135px;
+        font-size: 1.5em;
+        margin: 30px;
+        background-color: #FFFFFF;
+        border: 1px solid black;
+        opacity: 0.6;
+      }
+      .scoreboard {
+        z-index: 5;
+        position: absolute;
+        right: 0px;
+        text-align: left;
+        font-size: 1.0em;
+        margin: 30px;
+        top:175px;
+        background-color: #FFFFFF;
+        border: 1px solid black;
+        opacity: 0.6;
+      }
+      .warpUses {
+        z-index: 5;
+        position: absolute;
+        right: 0;
+        top: 50px;
+        text-align: right;
+        font-size: 1.5em;
+        margin: 30px;
+        background-color: #FFFFFF;
+        border: 1px solid black;
+        opacity: 0.6;
+      }
+      .boostTime {
+        z-index: 5;
+        position: absolute;
+        right: 0;
+        top: 92px;
+        text-align: right;
+        font-size: 1.5em;
+        margin: 30px;
+        background-color: #FFFFFF;
+        border: 1px solid black;
+        opacity: 0.6;
+      }
+    </style>
+
+  </head>
+  <body>
+    
+     <table>
+          <tr>
+            <td>
+
+              <div id="nickWrap">
+                  <p>Enter your prefered nickname to chat:</p>
+                  <p id="nickError"></p>
+                  <form id="setNick">
+                    <input size="35" id="nickname"></input>
+                    <input type="submit"></input>
+                  </form>
+                </div>
+
+                <div id="contentWrap">
+                  <div id="chatWrap" >
+                    <div id="chat"></div>
+                  </div>
+                  <p>
+                    <form id="send-message">
+                      <input size="35" id="message"></input>
+                      <input type="submit"></input>
+                    </form>
+                  </div>
+                  <div id="users"></div>
+                </div>
+                
+                <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+                <script src="/socket.io/socket.io.js"></script>
+                <script>
+                  jQuery(function($){
+                    var socket = io.connect();
+                    var $nickForm = $('#setNick');
+                    var $nickError = $('#nickError');
+                    var $nickBox = $('#nickname');
+                    var $users = $('#users');
+                    var $messageForm = $('#send-message');
+                    var $messageBox = $('#message');
+                    var $chat = $('#chat');
+                    
+                    $nickForm.submit(function(e){
+                      e.preventDefault();
+                      socket.emit('new user', $nickBox.val(), function(data){
+                        if(data){
+                          $('#nickWrap').hide();
+                          $('#contentWrap').show();
+                        } else{
+                          $nickError.html('That username is already taken!  Try again.');
+                        }
+                      });
+                      $nickBox.val('');
+                    });
+
+                    
+                    $messageForm.submit(function(e){
+                      e.preventDefault();
+                      socket.emit('send message', $messageBox.val());
+                      $messageBox.val('');
+                    });
+                    
+                    socket.on('new message', function(data)
+                    {
+                      $chat.append('<b>' + data.nick + ': </b>' + data.msg + "<br/>");
+                    });
+                  });
+                </script></td>
+          
+            <td><canvas id='mazeGame' width='800' height='600'></canvas></td>
+            <td><tr><span id="players" class="players"></span></tr>
+                <tr><span id="runtime" class="runtime"></span></tr>
+                <tr><span id="scoreboard" class="scoreboard"></span></tr>
+                <tr><span id="boostTime" class="boostTime"></span></tr>
+                <tr><span id="warpUses" class="warpUses"></span></tr>
+            </td>
+          </tr>
+      </table>
+    
+  </body>
+</html>
